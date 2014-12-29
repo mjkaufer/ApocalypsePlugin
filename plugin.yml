@@ -1,0 +1,7 @@
+name: Apocalypse
+main: org.kaufer.matthew.ApocalypsePlugin.Apocalypse
+version: 1.0.0
+author: mjkaufer
+commands:
+    apocalypse:
+        description: returns plugin info
