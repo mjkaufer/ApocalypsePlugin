@@ -62,7 +62,7 @@ public class Apocalypse extends JavaPlugin {
                 public void run() {
                     addZombies();
                 }
-            }, 0L, 20L * 180L);//20 ticks is a second
+            }, 0L, 20L * 45L);//20 ticks is a second
             
     }
    
@@ -97,7 +97,8 @@ public class Apocalypse extends JavaPlugin {
     		for(int i = 0; i < (int)(Math.random() * 4 + 2); i++){//spawn a few zombies
         		float yaw = l.getYaw();//Yaw of person
         		//we want the zombie to spawn behind the person, more or less, so we'll give it an offset of +-30
-        		yaw += (Math.random() * 60 - 30);//+-30
+        		float angle = 60;//variance
+        		yaw += (Math.random() * angle*2 - angle);//+-angle
         		yaw = (yaw + 360) % 360;//360 is to get it out of 360
         		//with yaw, 90 maps to -x, -90 maps to x, so we're going to negate x values
         		yaw = yaw * (float)(Math.PI) / 180.0f;//to radians, very important
