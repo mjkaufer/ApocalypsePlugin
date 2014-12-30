@@ -3,6 +3,7 @@ package org.kaufer.matthew.ApocalypsePlugin;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -21,7 +22,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.Plugin;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -40,6 +41,12 @@ public class Apocalypse extends JavaPlugin {
 	private List<String> firstTimePlayers = new ArrayList<String>();
 	private ApocalypseListener listener = null;
 	
+    private HashMap<String,Material> corresponding = null;//corresponding materials for beast, scout, archer, jackofalltrades
+
+    
+	public static final String INVNAME = "Apocalypse Classes";
+	
+	
 	public void am(String s){//prints to console with [Apocalypse] in front
 		System.out.println("[Apocalypse] " + s);
 	}
@@ -48,13 +55,14 @@ public class Apocalypse extends JavaPlugin {
 		firstTimePlayers.add(s);
 	}
 	
+	
     public boolean firstTime(String player){//return true if it's the player's first time joining
         
         File saveTo = new File(getDataFolder() + "\\data\\"+player+".dat");
         if (saveTo.exists())//if they already were on this server...
             return false;//we only want do do stuff for first time
         
-        if(!saveTo.exists())
+        if(!saveTo.exists() && firstTimePlayers.indexOf(player) == -1)//they're not in first time players, so we'll add them
         {
         	addToFirstTimePlayers(player);
         }
@@ -94,7 +102,15 @@ public class Apocalypse extends JavaPlugin {
             getConfig().options().copyDefaults(true);
             saveConfig();
             
-            am("DATA FOLDER: " + getDataFolder());
+            corresponding = new HashMap<String,Material>();
+            corresponding.put("beast",Material.DIAMOND_SWORD);
+            corresponding.put("scout",Material.SADDLE);
+            corresponding.put("archer",Material.BOW);
+            corresponding.put("jackofalltrades",Material.GOLD_HELMET);
+            
+
+            
+//            am("DATA FOLDER: " + getDataFolder());
             
 //            firstTimePlayers.add("mjkaufer");//for debugging
             
@@ -106,7 +122,7 @@ public class Apocalypse extends JavaPlugin {
             File df = new File(getDataFolder()+ "\\data");
             if(!df.exists()){
             	df.mkdir();//make the directory
-            	am("Made data directory!");
+//            	am("Made data directory!");
             }
             
             
@@ -153,47 +169,36 @@ public class Apocalypse extends JavaPlugin {
             if(cmd.getName().equalsIgnoreCase("apocalypse"))
             {
             	if(args.length > 0){
+	            	if(args[0].equalsIgnoreCase("gui") && firstTimePlayers.indexOf(player.getName()) > -1){
+	            		gui(player);
+	            		return true;
+	            	}
+	            	else if(args[0].equalsIgnoreCase("class") && firstTimePlayers.indexOf(player.getName()) > -1){//first time player, so we can let them choose a class
+            			gui(player);
+            			return true;
+	            	}
+	            	else if((args[0].equalsIgnoreCase("class") || args[0].equalsIgnoreCase("gui")) && firstTimePlayers.indexOf(player.getName()) == -1){
+	            		player.sendMessage(sam("You've already gotten your class!"));
+	            		return true;
+	            	}
+	            	
+	            	
+	            	
             		if(!player.hasPermission("Apocalypse.*")){//not allowed to do fancy commands
             			player.sendMessage(sam("Need Apocalypse.* permission!"));
             			return true;
             		}
 	            	if(args[0].equalsIgnoreCase("zombie")){
 	            		addZombies();
+	            		return true;
 	            	}
 	            	else if(args[0].equalsIgnoreCase("chest")){
 	            		updateChests();
-	            	}
-	            	else if(args[0].equalsIgnoreCase("class") && firstTimePlayers.indexOf(player.getName()) > -1){//first time player, so we can let them choose a class
-	            		if(args.length > 1){
-	            			String cn = args[1].toLowerCase();
-	            			if(listener.getClasses().containsKey(cn)){//valid class
-	            				if(createFile(player.getName())){//the file created correctly
-		            				player.getInventory().setContents(listener.getClasses().get(cn));
-		            				player.sendMessage(sam(ChatColor.AQUA + "Chose " + args[1].toLowerCase() + " class"));
-		            				firstTimePlayers.remove(player.getName());//make sure we get rid of them from the player list
-		            				s.broadcastMessage(sam("Everybody please welcome " + ChatColor.GREEN + player.getName() + ChatColor.RESET + "... " + ChatColor.BOLD + ChatColor.RED + ChatColor.UNDERLINE + "TO THEIR DOOM!"));
-		            				return true;
-	            				}
-	            				else{
-	            					player.sendMessage(sam("There was an error getting you your class. Contact server administrator."));
-	            					return false;
-	            				}
-	            			} else{
-		            			player.sendMessage(sam("Please specify which class you'd like - " + listener.getClasses().keySet().toString()));
-	            			}
-	            		}
-	            		else{
-	            			player.sendMessage(sam("Please specify which class you'd like - " + listener.getClasses().keySet().toString()));
-	            		}
-	            	}
-	            	else if(args[0].equalsIgnoreCase("class") && firstTimePlayers.indexOf(player.getName()) == -1){
-	            		player.sendMessage(sam("You've already gotten your class!"));
+	            		return true;
 	            	}
             	}
-        		else{
-            		PluginDescriptionFile p = this.getDescription();
-                    player.sendMessage(sam(ChatColor.AQUA + p.getName() + ChatColor.GREEN + " V" + p.getVersion() + ChatColor.AQUA + " , by " + ChatColor.RED + "mjkaufer"));
-        		}
+        		PluginDescriptionFile p = this.getDescription();
+                player.sendMessage(sam(ChatColor.AQUA + p.getName() + ChatColor.GREEN + " V" + p.getVersion() + ChatColor.AQUA + " , by " + ChatColor.RED + "mjkaufer"));
             	return true;
             }
             return false;
@@ -202,6 +207,35 @@ public class Apocalypse extends JavaPlugin {
     
     public String sam(String s){
     	return ChatColor.RED + "[" + ChatColor.AQUA + "Apocalypse" + ChatColor.RED + "] " + ChatColor.RESET + s;
+    }
+    
+    public void callback(Player player, String cn){
+		if(createFile(player.getName())){//the file created correctly
+			player.getInventory().setContents(listener.getClasses().get(cn));
+			player.sendMessage(sam(ChatColor.AQUA + "Chose " + ChatColor.ITALIC + cn + ChatColor.RESET + ChatColor.AQUA + " class"));
+			firstTimePlayers.remove(player.getName());//make sure we get rid of them from the player list
+			s.broadcastMessage(sam("Everybody please welcome " + ChatColor.GREEN + player.getName() + ChatColor.RESET + "... " + ChatColor.BOLD + ChatColor.RED + ChatColor.UNDERLINE + "TO THEIR DOOM!"));
+			return;
+		}
+		
+		player.sendMessage(sam("There was an error getting you your class. Contact server administrator."));
+
+
+    }
+    
+    public void gui(Player p){
+    	        
+        
+        Inventory inv = Bukkit.createInventory(null, 9, INVNAME);
+        for(String cn : listener.getClasses().keySet()){
+        	ItemStack a = new ItemStack(corresponding.get(cn), 1);
+        	ItemMeta im = a.getItemMeta();
+        	im.setDisplayName(cn.toUpperCase());
+        	a.setItemMeta(im);
+        	inv.addItem(a);
+        }
+        p.openInventory(inv);
+//        inv.setItem(5, new ItemStack(Material.COBBLESTONE,45));
     }
     
     public boolean addZombies(){
@@ -213,10 +247,10 @@ public class Apocalypse extends JavaPlugin {
     		//TODO - make it so zombies don't spawn in nothing
     		//check if location to spawn at has air, if not, move up, modulus around possibilities, when done, quit
     		Location l = p.getLocation();
-    		for(int i = 0; i < (int)(Math.random() * 4 + 4); i++){//spawn a few zombies
+    		for(int i = 0; i < (int)(Math.random() * 8 + 12); i++){//spawn a few zombies
         		float yaw = l.getYaw();//Yaw of person
         		//we want the zombie to spawn behind the person, more or less, so we'll give it an offset of +-30
-        		float angle = 60;//variance
+        		float angle = 75;//variance
         		yaw += (Math.random() * angle*2 - angle);//+-angle
         		yaw = (yaw + 360) % 360;//360 is to get it out of 360
         		//with yaw, 90 maps to -x, -90 maps to x, so we're going to negate x values

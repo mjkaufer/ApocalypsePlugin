@@ -18,6 +18,7 @@ classes:
     - CHAINMAIL_CHESTPLATE 1
     - CHAINMAIL_LEGGINGS 1
     - CHAINMAIL_BOOTS 1
+    - SADDLE 1
   archer:
     - BOW 1
     - ARROW 64

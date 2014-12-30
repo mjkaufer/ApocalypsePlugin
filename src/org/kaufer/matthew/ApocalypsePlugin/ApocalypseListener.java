@@ -1,7 +1,5 @@
 package org.kaufer.matthew.ApocalypsePlugin;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 
@@ -10,6 +8,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -28,7 +27,7 @@ public class ApocalypseListener implements Listener{
             
             for(String cn : c){//each class...
             	List<String> cs = plugin.getConfig().getStringList("classes."+cn);
-            	plugin.am(cs.toString());
+//            	plugin.am(cs.toString());
             	ItemStack[] add = new ItemStack[cs.size()];
             	for(int i = 0; i < add.length; i++){
             		String mName = cs.get(i).split(" ")[0];
@@ -50,8 +49,28 @@ public class ApocalypseListener implements Listener{
     public void onPlayerJoin(PlayerJoinEvent event){//only want to do first time
         Player pla = event.getPlayer();
         String dis = pla.getName();
-        System.out.println("First:"+plugin.firstTime(dis));
+        plugin.firstTime(dis);
+//        System.out.println("First:"+plugin.firstTime(dis));
         
+    }
+    
+    @EventHandler
+    public void inventoryClick(InventoryClickEvent event){
+        Player p = (Player)event.getWhoClicked();
+        if(!plugin.firstTime(p.getName()))//not their first time
+        	return;
+        if(event.getInventory().getTitle() != null && event.getInventory().getTitle().equalsIgnoreCase(Apocalypse.INVNAME)){
+            if(event.getCurrentItem() != null){
+                if(event.getCurrentItem().getType() != Material.AIR){
+                    event.setCancelled(true);
+//                    System.out.println("Got a class!");
+                    String cn = event.getCurrentItem().getItemMeta().getDisplayName();
+//                    p.sendMessage(plugin.sam("You picked a class! The " + cn + " class!"));
+                    p.closeInventory();//close their inventory
+                    plugin.callback(p, cn.toLowerCase());
+                }
+            }
+        }
     }
     
 }
