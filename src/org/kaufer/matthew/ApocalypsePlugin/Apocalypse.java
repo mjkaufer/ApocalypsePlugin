@@ -154,7 +154,7 @@ public class Apocalypse extends JavaPlugin {
             {
             	if(args.length > 0){
             		if(!player.hasPermission("Apocalypse.*")){//not allowed to do fancy commands
-            			player.sendMessage("Need Apocalypse.* permission!");
+            			player.sendMessage(sam("Need Apocalypse.* permission!"));
             			return true;
             		}
 	            	if(args[0].equalsIgnoreCase("zombie")){
@@ -169,34 +169,39 @@ public class Apocalypse extends JavaPlugin {
 	            			if(listener.getClasses().containsKey(cn)){//valid class
 	            				if(createFile(player.getName())){//the file created correctly
 		            				player.getInventory().setContents(listener.getClasses().get(cn));
-		            				player.sendMessage(ChatColor.AQUA + "Chose " + args[1].toLowerCase() + " class");
+		            				player.sendMessage(sam(ChatColor.AQUA + "Chose " + args[1].toLowerCase() + " class"));
 		            				firstTimePlayers.remove(player.getName());//make sure we get rid of them from the player list
+		            				s.broadcastMessage(sam("Everybody please welcome " + ChatColor.GREEN + player.getName() + ChatColor.RESET + "... " + ChatColor.BOLD + ChatColor.RED + ChatColor.UNDERLINE + "TO THEIR DOOM!"));
 		            				return true;
 	            				}
 	            				else{
-	            					player.sendMessage("There was an error getting you your class. Contact server administrator.");
+	            					player.sendMessage(sam("There was an error getting you your class. Contact server administrator."));
 	            					return false;
 	            				}
 	            			} else{
-		            			player.sendMessage("Please specify which class you'd like - " + listener.getClasses().keySet().toString());
+		            			player.sendMessage(sam("Please specify which class you'd like - " + listener.getClasses().keySet().toString()));
 	            			}
 	            		}
 	            		else{
-	            			player.sendMessage("Please specify which class you'd like - " + listener.getClasses().keySet().toString());
+	            			player.sendMessage(sam("Please specify which class you'd like - " + listener.getClasses().keySet().toString()));
 	            		}
 	            	}
 	            	else if(args[0].equalsIgnoreCase("class") && firstTimePlayers.indexOf(player.getName()) == -1){
-	            		player.sendMessage("You've already gotten your class!");
+	            		player.sendMessage(sam("You've already gotten your class!"));
 	            	}
             	}
         		else{
             		PluginDescriptionFile p = this.getDescription();
-                    player.sendMessage(ChatColor.AQUA + p.getName() + ChatColor.GREEN + " V" + p.getVersion() + ChatColor.AQUA + " , by " + ChatColor.RED + "mjkaufer");
+                    player.sendMessage(sam(ChatColor.AQUA + p.getName() + ChatColor.GREEN + " V" + p.getVersion() + ChatColor.AQUA + " , by " + ChatColor.RED + "mjkaufer"));
         		}
             	return true;
             }
             return false;
            
+    }
+    
+    public String sam(String s){
+    	return ChatColor.RED + "[" + ChatColor.AQUA + "Apocalypse" + ChatColor.RED + "] " + ChatColor.RESET + s;
     }
     
     public boolean addZombies(){
