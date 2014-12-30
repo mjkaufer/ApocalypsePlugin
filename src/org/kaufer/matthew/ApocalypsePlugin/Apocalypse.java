@@ -1,5 +1,6 @@
 package org.kaufer.matthew.ApocalypsePlugin;
 
+import java.io.File;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -35,11 +36,15 @@ public class Apocalypse extends JavaPlugin {
 	private Material[] items = new Material[]{Material.CARROT, Material.MELON, Material.APPLE, Material.COOKED_FISH, Material.COOKED_CHICKEN, Material.TORCH, Material.STICK, Material.COBBLESTONE, Material.FLINT, Material.COOKED_BEEF, Material.FEATHER, Material.ARROW, Material.IRON_INGOT, Material.COOKIE, Material.BREAD, Material.ROTTEN_FLESH, Material.MUSHROOM_SOUP, Material.GOLDEN_APPLE};
 	private Material[] tools = new Material[]{Material.STONE_PICKAXE, Material.BOW, Material.STONE_SWORD, Material.LEATHER_HELMET, Material.LEATHER_CHESTPLATE, Material.LEATHER_BOOTS, Material.IRON_SWORD, Material.LEATHER_LEGGINGS, Material.IRON_BOOTS, Material.CHAINMAIL_HELMET, Material.IRON_LEGGINGS, Material.IRON_CHESTPLATE, Material.GOLD_CHESTPLATE, Material.DIAMOND, Material.DIAMOND_SWORD, Material.DIAMOND_HELMET};
 	
+	public void am(String s){//prints to console with [Apocalypse] in front
+		System.out.println("[Apocalypse] " + s);
+	}
+	
 	@Override
     public void onDisable()
     {
     		PluginDescriptionFile p = this.getDescription();
-    		this.logger.info(p.getName() + " V" + p.getVersion() + " has been disnabled.");   
+    		this.logger.info(p.getName() + " V" + p.getVersion() + " has been disabled.");   
     		getServer().clearRecipes();
     }
    
@@ -49,7 +54,26 @@ public class Apocalypse extends JavaPlugin {
     		PluginDescriptionFile p = this.getDescription();
     		this.logger.info(p.getName() + " V" + p.getVersion() + " has been enabled.");
             PluginManager pm = this.getServer().getPluginManager();
-            pm.registerEvents(new ApocalypseListener(this), this);       
+            pm.registerEvents(new ApocalypseListener(this), this);    
+            
+            File dir = getDataFolder();//where we'll store user info
+            if(!dir.exists()){
+            	dir.mkdir();
+            	am("Data folder created!");
+            }
+            else{
+            	am("Data folder loaded.");
+            }
+            
+            getConfig().options().copyDefaults(true);
+            saveConfig();
+            
+            //            
+//            File dataFolder = getDataFolder();
+//            if(!dataFolder.exists())
+//                dataFolder.mkdir();
+//            else
+//            	System.out.println("Made Data Folder");
             
 //            
 //            Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
