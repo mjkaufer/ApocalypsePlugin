@@ -5,3 +5,7 @@ author: mjkaufer
 commands:
     apocalypse:
         description: returns plugin info
+permissions:
+    Apocalypse.*:
+        description: allows manual zombie-spawning and chest updating
+        default: op
