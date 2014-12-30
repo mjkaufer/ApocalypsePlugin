@@ -1,6 +1,8 @@
 package org.kaufer.matthew.ApocalypsePlugin;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -35,10 +37,42 @@ public class Apocalypse extends JavaPlugin {
 	
 	private Material[] items = new Material[]{Material.CARROT, Material.MELON, Material.APPLE, Material.COOKED_FISH, Material.COOKED_CHICKEN, Material.TORCH, Material.STICK, Material.COBBLESTONE, Material.FLINT, Material.COOKED_BEEF, Material.FEATHER, Material.ARROW, Material.IRON_INGOT, Material.COOKIE, Material.BREAD, Material.ROTTEN_FLESH, Material.MUSHROOM_SOUP, Material.GOLDEN_APPLE};
 	private Material[] tools = new Material[]{Material.STONE_PICKAXE, Material.BOW, Material.STONE_SWORD, Material.LEATHER_HELMET, Material.LEATHER_CHESTPLATE, Material.LEATHER_BOOTS, Material.IRON_SWORD, Material.LEATHER_LEGGINGS, Material.IRON_BOOTS, Material.CHAINMAIL_HELMET, Material.IRON_LEGGINGS, Material.IRON_CHESTPLATE, Material.GOLD_CHESTPLATE, Material.DIAMOND, Material.DIAMOND_SWORD, Material.DIAMOND_HELMET};
+	private List<String> firstTimePlayers = new ArrayList<String>();
+	private ApocalypseListener listener = null;
 	
 	public void am(String s){//prints to console with [Apocalypse] in front
 		System.out.println("[Apocalypse] " + s);
 	}
+	
+	public void addToFirstTimePlayers(String s){
+		firstTimePlayers.add(s);
+	}
+	
+    public boolean firstTime(String player){//return true if it's the player's first time joining
+        
+        File saveTo = new File(getDataFolder() + "\\data\\"+player+".dat");
+        if (saveTo.exists())//if they already were on this server...
+            return false;//we only want do do stuff for first time
+        
+        if(!saveTo.exists())
+        {
+        	addToFirstTimePlayers(player);
+        }
+        return true;
+    }
+    
+    public boolean createFile(String player){
+        File saveTo = new File(getDataFolder() + "\\data\\"+player+".dat");
+
+        try {
+            saveTo.createNewFile();
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("[Apocalypse]Serious error - Could not create player data file for player " + player + ". Contact mjkaufer");
+            return false;
+        }
+    }
 	
 	@Override
     public void onDisable()
@@ -54,24 +88,28 @@ public class Apocalypse extends JavaPlugin {
     		PluginDescriptionFile p = this.getDescription();
     		this.logger.info(p.getName() + " V" + p.getVersion() + " has been enabled.");
             PluginManager pm = this.getServer().getPluginManager();
-            pm.registerEvents(new ApocalypseListener(this), this);    
-            
-            File dir = getDataFolder();//where we'll store user info
-            if(!dir.exists()){
-            	dir.mkdir();
-            	am("Data folder created!");
-            }
-            else{
-            	am("Data folder loaded.");
-            }
+            listener = new ApocalypseListener(this);
+            pm.registerEvents(listener , this);    
             
             getConfig().options().copyDefaults(true);
             saveConfig();
             
+            am("DATA FOLDER: " + getDataFolder());
+            
+//            firstTimePlayers.add("mjkaufer");//for debugging
+            
             //            
-//            File dataFolder = getDataFolder();
-//            if(!dataFolder.exists())
-//                dataFolder.mkdir();
+            File dataFolder = getDataFolder();
+            if(!dataFolder.exists())
+                dataFolder.mkdir();
+            
+            File df = new File(getDataFolder()+ "\\data");
+            if(!df.exists()){
+            	df.mkdir();//make the directory
+            	am("Made data directory!");
+            }
+            
+            
 //            else
 //            	System.out.println("Made Data Folder");
             
@@ -124,6 +162,31 @@ public class Apocalypse extends JavaPlugin {
 	            	}
 	            	else if(args[0].equalsIgnoreCase("chest")){
 	            		updateChests();
+	            	}
+	            	else if(args[0].equalsIgnoreCase("class") && firstTimePlayers.indexOf(player.getName()) > -1){//first time player, so we can let them choose a class
+	            		if(args.length > 1){
+	            			String cn = args[1].toLowerCase();
+	            			if(listener.getClasses().containsKey(cn)){//valid class
+	            				if(createFile(player.getName())){//the file created correctly
+		            				player.getInventory().setContents(listener.getClasses().get(cn));
+		            				player.sendMessage(ChatColor.AQUA + "Chose " + args[1].toLowerCase() + " class");
+		            				firstTimePlayers.remove(player.getName());//make sure we get rid of them from the player list
+		            				return true;
+	            				}
+	            				else{
+	            					player.sendMessage("There was an error getting you your class. Contact server administrator.");
+	            					return false;
+	            				}
+	            			} else{
+		            			player.sendMessage("Please specify which class you'd like - " + listener.getClasses().keySet().toString());
+	            			}
+	            		}
+	            		else{
+	            			player.sendMessage("Please specify which class you'd like - " + listener.getClasses().keySet().toString());
+	            		}
+	            	}
+	            	else if(args[0].equalsIgnoreCase("class") && firstTimePlayers.indexOf(player.getName()) == -1){
+	            		player.sendMessage("You've already gotten your class!");
 	            	}
             	}
         		else{

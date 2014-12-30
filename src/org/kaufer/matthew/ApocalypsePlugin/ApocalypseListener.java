@@ -21,7 +21,7 @@ public class ApocalypseListener implements Listener{
     public ApocalypseListener(Apocalypse instance)
     {
             plugin = instance;
-            plugin.am("TEST2");
+//            plugin.am("TEST2");
 //            plugin.getConfig().options().
             //we'll hard code in the classes for now
             String[] c = new String[]{"beast","scout","archer","jackofalltrades"};
@@ -42,28 +42,16 @@ public class ApocalypseListener implements Listener{
             }
     }
     
+    public HashMap<String, ItemStack[]> getClasses(){
+    	return classes;
+    }
+    
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event){//only want to do first time
         Player pla = event.getPlayer();
         String dis = pla.getName();
-        System.out.println("First:"+firstTime(dis));
+        System.out.println("First:"+plugin.firstTime(dis));
+        
     }
     
-    public boolean firstTime(String player){//return true if it's the player's first time joining
-       
-        File saveTo = new File(plugin.getDataFolder() + "data/"+player+".dat");
-        if (saveTo.exists())//if they already were on this server...
-            return false;//we only want do do stuff for first time
-        
-        if(!saveTo.exists())
-        {
-            try {
-                saveTo.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-                System.out.println("[Apocalypse]Serious error - Could not create player data file for player " + player + ". Contact mjkaufer");
-            }
-        }
-        return true;
-    }
 }
