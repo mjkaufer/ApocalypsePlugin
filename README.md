@@ -1,6 +1,6 @@
 # ApocalypsePlugin
 
-An apocalypse plugin for a Minecraft server.
+An apocalypse plugin for the MineZRC Minecraft server.
 
 By [mjkaufer](http://github.com/mjkaufer)
 
