@@ -256,8 +256,9 @@ public class Apocalypse extends JavaPlugin {
         		//with yaw, 90 maps to -x, -90 maps to x, so we're going to negate x values
         		yaw = yaw * (float)(Math.PI) / 180.0f;//to radians, very important
 
-        		Vector sub = new Vector(-1 * magnitude * Math.sin(yaw),-2,magnitude * Math.cos(yaw));//sin is to x because of weirdass layout - the -2 y val is so the monster spawns in the air 
+        		Vector sub = new Vector(-1 * magnitude * Math.sin(yaw),0,magnitude * Math.cos(yaw));//sin is to x because of weirdass layout - the -2 y val is so the monster spawns in the air 
         		Location mobPosition = l.subtract(sub);
+        		mobPosition.setY(apocalypseWorld.getHighestBlockYAt(mobPosition));
         		apocalypseWorld.spawnEntity(mobPosition, EntityType.ZOMBIE);
     		}
 
